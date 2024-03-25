@@ -1,18 +1,12 @@
-streamlit==1.31.1
-streamlit-authenticator==0.3.1
-streamlit-cookies-manager==0.2.0
-streamlit-login-auth-ui==0.2.0
-streamlit-option-menu==0.3.12
-bcrypt==3.2.0
-mysql-connector-python==8.3.0
-matplotlib==3.8.3
-sqlalchemy==2.0.28
-# python3-dev 
-# default-libmysqlclient-dev 
-# build-essential 
-# pkg-config
-mysqlclient==2.2.4
-pymongo==4.6.2
-plotly==5.19.0
-
-#https://pypi.org/project/mysqlclient/
+streamlit
+streamlit-authenticator
+streamlit-cookies-manager
+streamlit-login-auth-ui
+streamlit-option-menu
+bcrypt
+mysql-connector-python
+matplotlib
+sqlalchemy
+mysqlclient
+pymongo
+plotly
