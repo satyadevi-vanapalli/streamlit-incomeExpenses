@@ -3,6 +3,7 @@ import streamlit as st
 from pymongo import MongoClient
 import ssl
 import mysql.connector
+from sqlalchemy.sql import text
 
 conn = st.connection('mysql', type='sql')
 with conn.session as s:
