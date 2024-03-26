@@ -3,26 +3,61 @@ import streamlit as st
 from pymongo import MongoClient
 import ssl
 import mysql.connector
-print("555555555555")
-conn = st.connection('mysql', type='sql')
 
-# Perform query.
-df = conn.query('SELECT * from users1;', ttl=600)
-
-# mydb1 = mysql.connector.connect(
+# mydb = mysql.connector.connect(
 #     host= "sql.freedb.tech",
 #     user= "freedb_satya",
 #     password= "BPCtC?5Ye4PqyCr",
-#     database= "freedb_steamlit_authentication"
+#     database= "freedb_steamlit_authentication",
+#     autocommit=True,
+#     connect_timeout=10000
 # )
-# print(11111)
-# mycursor = mydb1.cursor()
-# print(mycursor)
-# mycursor.execute('select * from users1')
+# mycursor = mydb.cursor(dictionary=True)
+# mycursor.execute('select * from users')
 # data = mycursor.fetchall()
+# st.write(mycursor,"////", data)
+# mycursor.close()
+# mycursor = mydb.cursor(dictionary=True)
+
+# mycursor.execute('select * from users')
+# data = mycursor.fetchall()
+# st.write(data,"11111111111S")
+# print("555555555555")
+
+# # Perform query.
+conn = st.connection('mysql', type='sql')
+
+df = conn.query('SELECT * from users1;', ttl=600)
 st.write(df,"dddddddddd", df.to_dict())
-for row in df.itertuples():
-    st.write({row.id})
+
+# # mydb1 = mysql.connector.connect(
+# #     host= "sql.freedb.tech",
+# #     user= "freedb_satya",
+# #     password= "BPCtC?5Ye4PqyCr",
+# #     database= "freedb_steamlit_authentication"
+# # )
+# # print(11111)
+# # mycursor = mydb1.cursor()
+# # print(mycursor)
+# # mycursor.execute('select * from users1')
+# # data = mycursor.fetchall()
+
+mydb = mysql.connector.connect(
+    host= "sql.freedb.tech",
+    user= "freedb_satya",
+    password= "BPCtC?5Ye4PqyCr",
+    database= "freedb_steamlit_authentication",
+    autocommit=True,
+    connect_timeout=10000,
+    port = 3306
+
+)
+mycursor = mydb.cursor(dictionary=True)
+mycursor.execute('select * from users')
+data = mycursor.fetchall()
+st.write(mycursor,"////", data)
+# for row in df.itertuples():
+#     st.write({row.id})
     # st.write(f"{row.id} has a {row.email}")
 
 # # CONNECTION_STRING = "mongodb+srv://admin:admin@satyacluster.y5zdczt.mongodb.net/streamlit_authentication?retryWrites=true&w=majority"
