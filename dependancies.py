@@ -10,6 +10,7 @@ page_icon = ":money_with_wings:"  # emojis: https://www.webfx.com/tools/emoji-ch
 layout = "centered"
 # --------------------------------------
 st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
+st.write("OK")
 # mydb = mysql.connector.connect(
 #     host= "127.0.0.1",
 #     user= "satya",
@@ -22,14 +23,27 @@ st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
 # print(df,"ffffffffffffffffffffffffff", df.to_dict())
 # for row in df.to_dict():
 #     print(row,type(row))
+conn = st.connection('mysql', type='sql')
+
+df = conn.query('SELECT * from users1;', ttl=600)
+st.write(df,"dddddddddd", df.to_dict())
+
 mydb = mysql.connector.connect(
     host= "sql.freedb.tech",
     user= "freedb_satya",
     password= "BPCtC?5Ye4PqyCr",
     database= "freedb_steamlit_authentication",
-    autocommit=True
+    autocommit=True,
+    connect_timeout=10000,
+    port = 3306
+
 )
 mycursor = mydb.cursor(dictionary=True)
+mycursor.execute('select * from users')
+data = mycursor.fetchall()
+st.write(mycursor,"////", data)
+
+
 #     host = "sql.freedb.tech"
 # port = 3306
 # database = "freedb_steamlit_authentication"
@@ -50,8 +64,11 @@ def fetch_users():
     Fetch Users
     :return Dictionary of Users:
     """
+    mycursor = mydb.cursor(dictionary=True)
+
     mycursor.execute('select * from users')
     data = mycursor.fetchall()
+    mycursor.close()
     # #print(data)
     # st.write(data)
     # data =conn.query('SELECT * from users;', ttl=600)
@@ -63,9 +80,11 @@ def get_user_emails():
     Fetch User Emails
     :return List of user emails:
     """
+    mycursor = mydb.cursor(dictionary=True)
+
     mycursor.execute('select * from users')
     users = mycursor.fetchall()
-
+    mycursor.close()
     
 
 
@@ -88,6 +107,8 @@ def get_usernames():
     Fetch Usernames
     :return List of user usernames:
     """
+    mycursor = mydb.cursor(dictionary=True)
+
     mycursor.execute('select * from users')
     users = mycursor.fetchall()
     # users = conn.query('SELECT * from users;', ttl=600)
@@ -95,7 +116,7 @@ def get_usernames():
     for user in users:
         usernames.append(user['userName'])
     print(usernames,"JJJJJJJJJJJJJJJJJJJJ")
-    
+    mycursor.close()
     return usernames
 
 
@@ -163,8 +184,11 @@ def sign_up():
                                                 # conn.query(insert_stmt, data)
                                                     # cu.execute(insert_stmt, data)
                                                     # s.commit()
+                                                mycursor = mydb.cursor(dictionary=True)
+
                                                 mycursor.execute(insert_stmt, data)
                                                 mydb.commit()
+                                                mycursor.close()
                                                     # s.execute(
                                                     # "INSERT INTO parts (username, email, password) VALUES (:username, :email, :password);",
                                                     # params=dict(username=username, email=email, password=hashed_password[0]),)
@@ -206,6 +230,7 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
     
 
     """Returns the report on a successful creation, otherwise raises an error"""
+    mycursor = mydb.cursor(dictionary=True)
 
     sql = "SELECT * FROM users WHERE email = %s;"
     adr = (email,)
@@ -221,6 +246,8 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
         data = (incomes['Salary'], incomes['Other Income'], expenses['Rent'], expenses['Groceries'], expenses['Other Expenses'], expenses['Savings'], period, userId, comment )
         mycursor.execute(insert_stmt, data)
         mydb.commit()
+        mycursor.close()
+
         if data:    
             st.success("Data saved!")
     elif type == 'update':
@@ -231,6 +258,7 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
         mycursor.execute(sql, val)
 
         mydb.commit()
+        mycursor.close()
 
         return True
 
@@ -242,6 +270,7 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
 def get_data_period(period, username):
     #print(period, username)
     try:
+        mycursor = mydb.cursor(dictionary=True)
         sql = "SELECT * FROM users WHERE email = %s;"
         adr = (username,)
         mycursor.execute(sql, adr)
@@ -252,6 +281,7 @@ def get_data_period(period, username):
         adr = (userId,period)
         mycursor.execute(sql, adr)
         data = mycursor.fetchone()
+        mycursor.close()
         #print(data,"ddddddddddddddddddddddddddddd")
         return data
     except Exception as e:
@@ -262,6 +292,7 @@ def get_data_period(period, username):
 def updatePassword(email,password):
     #print(email,"EEEEEEEEEEEEEEEEEEEEEEEEEEe")
     try:
+        mycursor = mydb.cursor(dictionary=True)
         newPassword = stauth.Hasher([password]).generate()
         # st.write(newPassword[0], password,bcrypt.checkpw(password.encode(),newPassword[0].encode()))
         # h = '$2b$12$qKUPeDdgGPwpXdURs9T8BeuNChgzl3oK92z7zrjm0qoklux3YzfTW'
@@ -272,7 +303,7 @@ def updatePassword(email,password):
         val = (newPassword[0], email)
 
         mycursor.execute(sql, val)
-
+        mycursor.close()
         mydb.commit()
 
         return True
