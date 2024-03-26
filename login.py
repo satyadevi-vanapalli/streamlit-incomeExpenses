@@ -2,7 +2,7 @@ import bcrypt
 import streamlit as st
 import streamlit_authenticator as stauth
 # from dependancies import sign_up, fetch_users
-from dependancies import fetch_users, sign_up, insert_period, get_data_period, updatePassword
+# from dependancies import sign_up, insert_period, get_data_period, updatePassword
 
 import calendar  # Core Python Module
 from datetime import datetime  # Core Python Module
@@ -20,6 +20,7 @@ import json
 import webbrowser
 
 import pandas as pd
+from sqlalchemy.sql import text
 
 
 # -------------- SETTINGS --------------
@@ -29,32 +30,9 @@ currency = "Rupees"
 page_title = "Income and Expense Tracker"
 page_icon = ":money_with_wings:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
 layout = "centered"
-# # --------------------------------------
-# st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
-# conn = st.connection('mysql', type='sql', autocommit=True)
-# st.write(conn,"+++++++++++++++++++++++=")
-
-conn = st.connection('mysql', type='sql')
-
-df = conn.query('SELECT * from users1;', ttl=600)
-st.write(df,"dddddddddd", df.to_dict(),"LLLLLLLLLLLLLLLLLLLLLL")
-
-# --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
 years = [datetime.today().year, datetime.today().year + 1]
 months = tuple(calendar.month_name[1:])
-with open('data.json', 'r') as file:
-    data = json.load(file)
 
-# st.markdown("""
-#     <style>
-#         .st-emotion-cache-1qqhz9z {
-#             padding-top:1rem !important;
-#         }
-
-#     </style>""", unsafe_allow_html=True)
-
-
-# --- HIDE STREAMLIT STYLE ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -63,6 +41,7 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+conn = st.connection('mysql', type='sql')
 
 # Replace the chart with several elements:
 
@@ -144,7 +123,11 @@ def dataVisualization():
                         height=500, width=600,color_discrete_sequence=colors)
             fig1.update_layout(margin=dict(l=20, r=20, t=30, b=20),font=dict(color='red', size=15))
             st.plotly_chart(fig1, use_container_width=True)
+def fetch_users():
+    df = conn.query('SELECT * from users;', ttl=600)
+    # st.write(df.to_dict())
 
+    return df
 try:
     
     # st.sidebar.w(f'Welcome {email}')
@@ -160,11 +143,12 @@ try:
     #     emails1.append(user[1])
     #     usernames1.append(user[2])
     #     passwords1.append(user[3])
-    for user in users:
-        # ##print(user)
-        emails.append(user['email'])
-        usernames.append(user['userName'])
-        passwords.append(user['password'])
+    for user in users.itertuples():
+    #     # ##print(user)
+        emails.append(user.email)
+        usernames.append(user.userName)
+        passwords.append(user.password)
+    # st.write(emails)
     ##print(emails,":::::::::::")
     ##print(usernames,"usernames")
 
@@ -175,7 +159,7 @@ try:
     credentials = {'usernames': {}}
     for index in range(len(emails)):
         credentials['usernames'][emails[index]] = {'name': usernames[index], 'password': passwords[index]}
-
+    st.write(credentials)
     Authenticator = stauth.Authenticate(credentials, cookie_name='Streamlit', key='abcdef', cookie_expiry_days=4)
     username, authentication_status, email = Authenticator.login('main')
     if not authentication_status:
