@@ -72,7 +72,9 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
                         text(query)
                     )
                     s.commit()
-                    st.success("Data saved!")
+                    print("Data saved successfully)
+                    st.success("Data saved successfully!")
+                    print("ssssssssssssss")
 
     except Exception as e:
         st.write(e)
