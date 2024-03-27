@@ -434,7 +434,7 @@ try:
 
                     # st.pyplot(fig1)
                     
-                    # dataVisualization()
+                    dataVisualization()
                     # pie_chart_data = data['pie_chart']
                     # plt.pie(pie_chart_data['sizes'], labels=pie_chart_data['labels'], colors='#000000')
                     # st.pyplot( plt )
