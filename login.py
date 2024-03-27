@@ -46,32 +46,74 @@ conn = st.connection('mysql', type='sql')
 # Replace the chart with several elements:
 def get_data_period(period, username):
     try:
-        # a = 'INSERT INTO users (username, email, password) VALUES ("{username}","{email}","{password}");'.format(username=username, email=email, password=hashed_password[0])
         a = 'SELECT * FROM users WHERE email = "{email}";'.format(email=username)
         df = conn.query(a, ttl=600)
-        st.write(df)
-        userId = ''
+        userId = None
         for row in df.itertuples():
             st.write(row.id)
             userId = row.id
         sql = "SELECT * FROM savings WHERE user_id = '{userId}' and month_year = '{period}';".format(userId=userId,period=period)
         data = conn.query(sql, ttl=600)
-        st.write(data)
-#         sql = "SELECT * FROM users WHERE email = %s;"
-#         adr = (username,)
-#         mycursor.execute(sql, adr)
-#         # #print(mycursor.fetchall()[0]['id'],">>>>>>>>>>>>>>>>>>>>>>")
-#         userId = mycursor.fetchall()[0]['id']
-#         #print(userId,"uer")
-#         sql = "SELECT * FROM savings WHERE user_id = %s and month_year = %s;"
-#         adr = (userId,period)
-#         mycursor.execute(sql, adr)
-#         data = mycursor.fetchone()
-#         mycursor.close()
-#         #print(data,"ddddddddddddddddddddddddddddd")
-#         return data 
     except Exception as e:
         st.error(e) 
+def insert_period(period, incomes, expenses, comment, email,type, id):
+    try:
+        a = 'SELECT * FROM users WHERE email = "{email}";'.format(email=email)
+        df = conn.query(a, ttl=600)
+        userId = None
+        for row in df.itertuples():
+            userId = row.id
+        if userId:
+            if (type == 'new'):
+                conn1 = st.connection('mysql', type='sql')
+                query = "INSERT INTO savings(salary, other_income, rent, groceries, other_expenses, savings, month_year, user_id, comments)" "VALUES ({salary},{other_income}, {rent}, {groceries}, {other_expenses}, {savings}, '{month_year}', {user_id}, '{comments}');".format(salary=incomes['Salary'],other_income=incomes['Other Income'],rent=expenses['Rent'],groceries=expenses['Groceries'],other_expenses=expenses['Other Expenses'],savings=expenses['Savings'],month_year=period,user_id=userId,comments=comment)
+                with conn1.session as s:
+                    s.execute(
+                        text(query)
+                    )
+                    s.commit()
+                    st.success("Data saved!")
+
+    except Exception as e:
+        st.write(e)
+    # #print(period, incomes, expenses, comment, email)
+    # # try: 
+    
+
+    # """Returns the report on a successful creation, otherwise raises an error"""
+    # mycursor = mydb.cursor(dictionary=True)
+
+    # sql = "SELECT * FROM users WHERE email = %s;"
+    # adr = (email,)
+    # mycursor.execute(sql, adr)
+    # result = mycursor.fetchone()
+    # userId = None
+    # #print(userId,"LLL", result)
+    # if result:
+    #     userId = result['id']
+    # if (type == 'new'):
+    #     insert_stmt = (
+    #     "INSERT INTO savings(salary, other_income, rent, groceries, other_expenses, savings, month_year, user_id, comments)" "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    #     data = (incomes['Salary'], incomes['Other Income'], expenses['Rent'], expenses['Groceries'], expenses['Other Expenses'], expenses['Savings'], period, userId, comment )
+    #     mycursor.execute(insert_stmt, data)
+    #     mydb.commit()
+    #     mycursor.close()
+
+    #     if data:    
+    #         st.success("Data saved!")
+    # elif type == 'update':
+    #     print ("ddddddddddd")
+    #     sql = "UPDATE savings SET salary = %s, other_income = %s, rent = %s, groceries = %s,  other_expenses = %s, savings = %s, comments = %s WHERE id = %s"
+    #     val = (incomes['Salary'], incomes['Other Income'], expenses['Rent'], expenses['Groceries'], expenses['Other Expenses'], expenses['Savings'], comment, id)
+
+    #     mycursor.execute(sql, val)
+
+    #     mydb.commit()
+    #     mycursor.close()
+
+    #     return True
+
+
 def resetPassowrd(userPwd, email):
     with st.sidebar.form('reset_password',clear_on_submit=False):
             st.subheader('Rest Password')
@@ -181,7 +223,7 @@ try:
     credentials = {'usernames': {}}
     for index in range(len(emails)):
         credentials['usernames'][emails[index]] = {'name': usernames[index], 'password': passwords[index]}
-    st.write(credentials)
+    # st.write(credentials)
     Authenticator = stauth.Authenticate(credentials, cookie_name='Streamlit', key='abcdef', cookie_expiry_days=4)
     username, authentication_status, email = Authenticator.login('main')
     if not authentication_status:
@@ -310,37 +352,37 @@ try:
                         "---"
                         submitted = False
                         submitted = st.form_submit_button("Update Entry") if (details and len(details.keys()) > 0) else st.form_submit_button("Add Entry")
-                        # if submitted:
-                        #     with st.spinner('Wait for it...'):
-                        #         st.write(st.session_state)
-                        #         period = str(year) + "_" + str(month)
-                        #         incomes = {income: st.session_state[income] for income in incomes}
-                        #         expenses = {expense: st.session_state[expense] for expense in expenses}
+                        if submitted:
+                            with st.spinner('Wait for it...'):
+                                st.write(st.session_state)
+                                period = str(year) + "_" + str(month)
+                                incomes = {income: st.session_state[income] for income in incomes}
+                                expenses = {expense: st.session_state[expense] for expense in expenses}
 
-                        #         if details: 
-                        #             updated = insert_period(period, incomes, expenses,comment, email, "update", details['id'])
-                        #             if updated:
-                        #                 with totalIncomeText.container():
-                        #                     totalIncome = st.session_state['Salary'] + st.session_state['Other Income']
-                        #                     text = 'Total Income: ' + f"{totalIncome:,}" + u'\u20B9'
-                        #                     st.write(text)
-                        #                 with totalExpensesText.container():                                        
-                        #                     totalExpenses = st.session_state['Rent'] + st.session_state['Groceries'] + st.session_state['Other Expenses'] + st.session_state['Savings']
-                        #                     expensestext = 'Total Expenses: ' + f"{totalExpenses:,}" + u'\u20B9'
-                        #                     st.write(expensestext)
-                        #                 with balanceText.container():
-                        #                     balanceT = 'Balance: ' + f"{(totalIncome - totalExpenses):,}" + u'\u20B9'
-                        #                     st.write(balanceT)
-                        #                 with commentText.container():
-                        #                     st.write("Comments: ", comment)
+                                if details: 
+                                    updated = insert_period(period, incomes, expenses,comment, email, "update", details['id'])
+                                    if updated:
+                                        with totalIncomeText.container():
+                                            totalIncome = st.session_state['Salary'] + st.session_state['Other Income']
+                                            text = 'Total Income: ' + f"{totalIncome:,}" + u'\u20B9'
+                                            st.write(text)
+                                        with totalExpensesText.container():                                        
+                                            totalExpenses = st.session_state['Rent'] + st.session_state['Groceries'] + st.session_state['Other Expenses'] + st.session_state['Savings']
+                                            expensestext = 'Total Expenses: ' + f"{totalExpenses:,}" + u'\u20B9'
+                                            st.write(expensestext)
+                                        with balanceText.container():
+                                            balanceT = 'Balance: ' + f"{(totalIncome - totalExpenses):,}" + u'\u20B9'
+                                            st.write(balanceT)
+                                        with commentText.container():
+                                            st.write("Comments: ", comment)
 
 
-                        #         else:
-                        #             insert_period(period, incomes, expenses,comment, email, "new",0)
-                        #         time.sleep(1)
+                                else:
+                                    insert_period(period, incomes, expenses,comment, email, "new",0)
+                                time.sleep(1)
 
-                        # else:
-                        #     print("KKKKKKKKKKKKKKKKKKKK")
+                        else:
+                            print("KKKKKKKKKKKKKKKKKKKK")
                 if selected == "Data Visualization":
                     st.header("Data Visualization")
                     # Pie chart, where the slices will be ordered and plotted counter-clockwise:
