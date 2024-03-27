@@ -67,14 +67,15 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
             if (type == 'new'):
                 conn1 = st.connection('mysql', type='sql')
                 query = "INSERT INTO savings(salary, other_income, rent, groceries, other_expenses, savings, month_year, user_id, comments)" "VALUES ({salary},{other_income}, {rent}, {groceries}, {other_expenses}, {savings}, '{month_year}', {user_id}, '{comments}');".format(salary=incomes['Salary'],other_income=incomes['Other Income'],rent=expenses['Rent'],groceries=expenses['Groceries'],other_expenses=expenses['Other Expenses'],savings=expenses['Savings'],month_year=period,user_id=userId,comments=comment)
+                st.write(query)
                 with conn1.session as s:
                     s.execute(
                         text(query)
                     )
                     s.commit()
-                    print("Data saved successfully")
+                    print("KKKKKKKKK")
                     st.success("Data saved successfully!")
-                    print("ssssssssssssss")
+                    print("?????????????????")
 
     except Exception as e:
         st.write(e)
