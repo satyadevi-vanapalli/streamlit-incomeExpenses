@@ -50,10 +50,23 @@ def get_data_period(period, username):
         df = conn.query(a, ttl=600)
         userId = None
         for row in df.itertuples():
-            st.write(row.id)
+            # st.write(row.id)
             userId = row.id
         sql = "SELECT * FROM savings WHERE user_id = '{userId}' and month_year = '{period}';".format(userId=userId,period=period)
         data = conn.query(sql, ttl=600)
+        dataInfo = {}
+        for se in data.to_dict():
+            dataInfo[se] = data.to_dict()[se][0]
+            # st.write(dataInfo)
+        return dataInfo
+        # if data.empty:
+        #     data = pd.DataFrame()
+        #     return data
+        # else:
+        #     # print("dddddddddddddddddd",data)
+        #     # data = pd.DataFrame()
+        #     return data
+        # return data
     except Exception as e:
         st.error(e) 
 def insert_period(period, incomes, expenses, comment, email,type, id):
@@ -76,6 +89,19 @@ def insert_period(period, incomes, expenses, comment, email,type, id):
                     print("KKKKKKKKK")
                     st.success("Data saved successfully!")
                     print("?????????????????")
+            elif type == 'update':
+                print ("ddddddddddd")
+                sql = "UPDATE savings SET salary = {salary}, other_income = {other_income}, rent = {rent}, groceries = {groceries},  other_expenses = {other_expenses}, savings = {savings}, comments = '{comments}' WHERE id = {id};".format(salary=incomes['Salary'],other_income=incomes['Other Income'],rent=expenses['Rent'],groceries=expenses['Groceries'],other_expenses=expenses['Other Expenses'],savings=expenses['Savings'],id=userId,comments=comment)
+                conn1 = st.connection('mysql', type='sql')
+                with conn1.session as s:
+                    s.execute(
+                        text(sql)
+                    )
+                    s.commit()
+                    print("KKKKKKKKK")
+                    st.success("Data updated successfully!")
+               
+                return True
 
     except Exception as e:
         st.write(e)
@@ -303,10 +329,19 @@ try:
                     
                         
                     st.header(f"Data Entry in {currency}")
-                    details = []
+                    # details = None
+                    details = pd.DataFrame()
+
                     details = get_data_period(str(year) + "_" + str(month), email)
-                    if details:
-                        st.write(details)
+                    # st.write("**********************", type(details))
+                    # st.write(details.empty,">>>>",not details.empty,details)
+                    # st.write(details,"K???<<<",get_data_period(str(year) + "_" + str(month), email), type(details),details.all(), details.empty)
+                    # details = []
+                    # if details.empty:
+                    #     st.write("eeeeeeeeeeeeeeeeeee")
+                    # else:
+                    #     st.write("GGGGGGGGGGGGGGGGGGG")
+                    if details and len(details.keys()) > 0:
                         details['Salary'] = details['salary']
                         details['Other Income'] = details['other_income']
                         details['other expenses'] = details['other_expenses']
@@ -381,9 +416,7 @@ try:
 
 
                                 else:
-                                    st.warning("wwwwwwwwwwwwwwwwwwwwwwwwww")
                                     insert_period(period, incomes, expenses,comment, email, "new",0)
-                                    st.write("data saved succcccc")
 
                         else:
                             print("KKKKKKKKKKKKKKKKKKKK")
