@@ -381,6 +381,7 @@ try:
 
 
                                 else:
+                                    st.warning("wwwwwwwwwwwwwwwwwwwwwwwwww")
                                     insert_period(period, incomes, expenses,comment, email, "new",0)
                                     st.write("data saved succcccc")
 
