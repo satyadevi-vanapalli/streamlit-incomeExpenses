@@ -382,7 +382,7 @@ try:
 
                                 else:
                                     insert_period(period, incomes, expenses,comment, email, "new",0)
-                                time.sleep(1)
+                                    st.write("data saved succcccc")
 
                         else:
                             print("KKKKKKKKKKKKKKKKKKKK")
